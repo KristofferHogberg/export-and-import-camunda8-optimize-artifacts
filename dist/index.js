@@ -43,7 +43,6 @@ const postReportData = async (token) => {
         "3576b30e-63bd-402e-a656-a0bc7d1bf73a",
         "ff80541e-8bd9-40f6-90ee-ce888b408e20"
     ];
-    // const token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlFVVXdPVFpDUTBVM01qZEVRME0wTkRFelJrUkJORFk0T0RZeE1FRTBSa1pFUlVWRVF6bERNZyJ9.eyJodHRwczovL2NhbXVuZGEuY29tL29yZ0lkIjoiNGU2ZjgyMTEtODI1Ny00MGIzLWJiMmYtN2FmNmRkZTA3MjgxIiwiaXNzIjoiaHR0cHM6Ly93ZWJsb2dpbi5jbG91ZC5jYW11bmRhLmlvLyIsInN1YiI6Im13bzkwdDJyMzE2MDd6MzZCTkg2OXRXRktCWDU1ajFXQGNsaWVudHMiLCJhdWQiOiJvcHRpbWl6ZS5jYW11bmRhLmlvIiwiaWF0IjoxNzA2MDE1MTYzLCJleHAiOjE3MDYxMDE1NjMsImF6cCI6Im13bzkwdDJyMzE2MDd6MzZCTkg2OXRXRktCWDU1ajFXIiwic2NvcGUiOiJlYWMwMTJmNy00Njc4LTQzYjctYmZlZi03N2Q3ODA3MWRkY2UiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMifQ.HCbs2nYmUcWDb_THNnfz8izWMRL5_yVlJNJlnnCNQLqmgW42ExNgLfnqMjfsAGbGhMPzQ_N2jaSaFt-QDnf2sxTlq014npRmdccPjynQ0Mx6x0iHwLHqGWFP0EKFtW7qbGlnR2QlsiBDEueHGoyQBP2zQqNyd0bDjg_Cxl2gNoERVR_q8fLipvDBOBtVmud8tC_Uh0MODiHRNmVFYgcEMXQxCqkZp2ObkD6U6M9GYixUhlxrTO0XJhoUxOddQzcF_-Xzfww4e6r-1wqt84HUk_tZnuLVa-XNf4rUvox9-V-Ng_BG-59YS0gnBrzA-HbcUKDo3o-mZ9QzQrzFVgnLcw'; // Replace with your actual token
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -83,7 +82,6 @@ const importReportData = async (token, data) => {
 const runWorkflow = async () => {
     try {
         const token = await getToken();
-        // console.log(`Optimize token: ${token}`);
         const reportData = await postReportData(token);
         await importReportData(token, reportData);
     }

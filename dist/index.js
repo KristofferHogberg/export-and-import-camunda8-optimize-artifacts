@@ -73,9 +73,17 @@ const postReportData = async (token) => {
     };
     try {
         const response = await axios_1.default.post(url, data, { headers });
+        return response.data;
+    }
+    catch (error) {
+        console.error('Error:', error);
+    }
+};
+const writeOptimizeEntityToFile = async (optimizeEntityData) => {
+    try {
         // Write to json
         const filename = 'response_data.json';
-        fs.writeFile(filename, JSON.stringify(response.data, null, 2), 'utf8', (err) => {
+        fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
             if (err) {
                 console.error('Error writing file:', err);
             }
@@ -83,7 +91,6 @@ const postReportData = async (token) => {
                 console.log(`Data written to file ${filename}`);
             }
         });
-        return response.data;
     }
     catch (error) {
         console.error('Error:', error);
@@ -108,6 +115,7 @@ const runWorkflow = async () => {
     try {
         const token = await getToken();
         const reportData = await postReportData(token);
+        await writeOptimizeEntityToFile(reportData);
         // await importReportData(token, reportData)
     }
     catch (error) {

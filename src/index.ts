@@ -55,15 +55,6 @@ const postReportData = async (token: string) => {
     try {
         const response: AxiosResponse = await axios.post(url, data, {headers});
 
-        // Write to json
-        const filename = 'response_data.json';
-        fs.writeFile(filename, JSON.stringify(response.data, null, 2), 'utf8', (err) => {
-            if (err) {
-                console.error('Error writing file:', err);
-            } else {
-                console.log(`Data written to file ${filename}`);
-            }
-        });
 
         return response.data;
 
@@ -71,6 +62,25 @@ const postReportData = async (token: string) => {
         console.error('Error:', error);
     }
 };
+
+const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
+    try {
+        // Write to json
+        const filename = 'response_data.json';
+        fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
+            if (err) {
+                console.error('Error writing file:', err);
+            } else {
+                console.log(`Data written to file ${filename}`);
+            }
+        });
+
+
+    } catch (error) {
+        console.error('Error:', error);
+    }
+
+}
 
 const importReportData = async (token: string, data: any) => {
     //  TODO: Add collection id as action input.
@@ -96,6 +106,7 @@ const runWorkflow = async () => {
 
         const token = await getToken();
         const reportData = await postReportData(token)
+        await writeOptimizeEntityToFile(reportData)
         // await importReportData(token, reportData)
 
     } catch (error) {

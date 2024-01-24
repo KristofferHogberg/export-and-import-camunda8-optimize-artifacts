@@ -29,7 +29,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const fs = __importStar(require("fs")); // Import the file system module
 const dotenv_1 = __importDefault(require("dotenv"));
+// TODO: Remove after running on GitHub runner.
 dotenv_1.default.config();
+// TODO: Convert to GH action inputs.
 let FILENAMES = [];
 const getToken = async () => {
     try {
@@ -60,7 +62,7 @@ const getToken = async () => {
         // return null;
     }
 };
-const postReportData = async (token) => {
+const exportReportData = async (token) => {
     // TODO: Add cluster id as an action input, get report ids from http request,
     const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/report/definition/json';
     const data = [
@@ -96,6 +98,22 @@ const writeOptimizeEntityToFile = async (optimizeEntityData) => {
         console.error('Error:', error);
     }
 };
+const readOptimizeEntityFromFile = async (optimizeEntityData) => {
+    try {
+        // Write to json
+        // const filename = 'response_data.json';
+        // fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
+        //     if (err) {
+        //         console.error('Error writing file:', err);
+        //     } else {
+        //         console.log(`Data written to file ${filename}`);
+        //     }
+        // });
+    }
+    catch (error) {
+        console.error('Error:', error);
+    }
+};
 const importReportData = async (token, data) => {
     //  TODO: Add collection id as action input.
     const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/import?collectionId=0fac1778-5c82-4425-900a-921df321a499';
@@ -114,9 +132,9 @@ const importReportData = async (token, data) => {
 const runWorkflow = async () => {
     try {
         const token = await getToken();
-        const reportData = await postReportData(token);
+        const reportData = await exportReportData(token);
         await writeOptimizeEntityToFile(reportData);
-        // await importReportData(token, reportData)
+        await importReportData(token, reportData);
     }
     catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

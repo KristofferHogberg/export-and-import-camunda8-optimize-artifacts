@@ -2,7 +2,10 @@ import axios, {AxiosResponse} from 'axios';
 import * as fs from 'fs'; // Import the file system module
 import dotenv from 'dotenv';
 
+// TODO: Remove after running on GitHub runner.
 dotenv.config();
+
+// TODO: Convert to GH action inputs.
 
 let FILENAMES: string[] = [];
 
@@ -39,7 +42,8 @@ const getToken = async () => {
     }
 }
 
-const postReportData = async (token: string) => {
+
+const exportReportData = async (token: string) => {
     // TODO: Add cluster id as an action input, get report ids from http request,
     const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/report/definition/json';
     const data = [
@@ -82,6 +86,26 @@ const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
 
 }
 
+const readOptimizeEntityFromFile = async (optimizeEntityData: any) => {
+    try {
+        // Write to json
+        // const filename = 'response_data.json';
+        // fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
+        //     if (err) {
+        //         console.error('Error writing file:', err);
+        //     } else {
+        //         console.log(`Data written to file ${filename}`);
+        //     }
+        // });
+
+
+    } catch (error) {
+        console.error('Error:', error);
+    }
+
+}
+
+
 const importReportData = async (token: string, data: any) => {
     //  TODO: Add collection id as action input.
     const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/import?collectionId=0fac1778-5c82-4425-900a-921df321a499';
@@ -105,9 +129,9 @@ const runWorkflow = async () => {
     try {
 
         const token = await getToken();
-        const reportData = await postReportData(token)
+        const reportData = await exportReportData(token)
         await writeOptimizeEntityToFile(reportData)
-        // await importReportData(token, reportData)
+        await importReportData(token, reportData)
 
     } catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

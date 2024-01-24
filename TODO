@@ -1,0 +1,7 @@
+<- NOTES ->
+
+    -> Identical process definitions required in data sources.
+
+        In order to be able to import a an exported Optimize entity,
+        the the same process definition is required to be defined in the data source
+        importing the entity as the one it is exported from.

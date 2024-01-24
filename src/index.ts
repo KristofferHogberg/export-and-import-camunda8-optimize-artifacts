@@ -54,18 +54,18 @@ const postReportData = async (token: string) => {
 
     try {
         const response: AxiosResponse = await axios.post(url, data, {headers});
+
+        // Write to json
+        const filename = 'response_data.json';
+        fs.writeFile(filename, JSON.stringify(response.data, null, 2), 'utf8', (err) => {
+            if (err) {
+                console.error('Error writing file:', err);
+            } else {
+                console.log(`Data written to file ${filename}`);
+            }
+        });
+
         return response.data;
-
-        // Write to a JSON file
-        // const filename = 'response_data.json';
-        // fs.writeFile(filename, JSON.stringify(response.data, null, 2), 'utf8', (err) => {
-        //     if (err) {
-        //         console.error('Error writing file:', err);
-        //     } else {
-        //         console.log(`Data written to file ${filename}`);
-        //     }
-        // });
-
 
     } catch (error) {
         console.error('Error:', error);
@@ -96,7 +96,7 @@ const runWorkflow = async () => {
 
         const token = await getToken();
         const reportData = await postReportData(token)
-        await importReportData(token, reportData)
+        // await importReportData(token, reportData)
 
     } catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

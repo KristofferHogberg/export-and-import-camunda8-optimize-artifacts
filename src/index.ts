@@ -159,9 +159,10 @@ const importReportData = async (token: string, data: any) => {
 
 }
 
-
-const getReportIdsSm = async (token: string) => {
-    const url = 'https://akstest.apendo.se/optimize/api/public/report?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
+// TODO: Get url from gh input
+const getOptimizeReportIds = async (token: string) => {
+    // const url = 'https://akstest.apendo.se/optimize/api/public/report?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
+    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/report?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
     const data = {}
     const headers = {
         'Content-Type': 'application/json',
@@ -170,7 +171,7 @@ const getReportIdsSm = async (token: string) => {
 
     try {
         const response: AxiosResponse = await axios.get(url, {headers});
-        console.log('Response:', JSON.stringify(response.data, null, 2));
+        return response.data
 
     } catch (error) {
         console.error('Error:', error);
@@ -181,13 +182,18 @@ const getReportIdsSm = async (token: string) => {
 const runWorkflow = async () => {
     try {
 
-        // const token = await getTokenCloud();
-        // const reportData = await exportReportData(token)
+        const tokenCloud = await getTokenCloud();
+        // const tokenSM = await getTokenSelfManaged()
+
+        // await getOptimizeReportIds(tokenSM)
+        const reportIds = await getOptimizeReportIds(tokenCloud)
+        console.log('Report IDs: ', JSON.stringify(reportIds, null, 2));
+
+        // const reportData = await exportReportData(tokenCloud)
+        //
         // await writeOptimizeEntityToFile(reportData)
-        // await importReportData(token, reportData)
-        const token = await getTokenSelfManaged()
-        console.log(`SM TOKEN: ${token}`)
-        await getReportIdsSm(token)
+        //
+        // await importReportData(tokenCloud, reportData)
 
 
     } catch (error) {

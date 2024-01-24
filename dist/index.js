@@ -33,7 +33,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 // TODO: Convert to GH action inputs.
 let FILENAMES = [];
-const getToken = async () => {
+const getTokenCloud = async () => {
     try {
         const url = 'https://login.cloud.camunda.io/oauth/token';
         const data = {
@@ -45,6 +45,36 @@ const getToken = async () => {
         const response = await axios_1.default.post(url, data, {
             headers: {
                 'Content-Type': 'application/json'
+            }
+        });
+        if (response.status === 200) {
+            const token = response.data.access_token;
+            // Remove all whitespaces from token
+            return token.replace(/\s+/g, '');
+        }
+        else {
+            console.error('Error:', response.statusText);
+            return null;
+        }
+    }
+    catch (error) {
+        // setFailed(error instanceof Error ? error.message : 'An error occurred');
+        // return null;
+    }
+};
+//TODO: Add Url and credentials from gh inputs.
+const getTokenSelfManaged = async () => {
+    try {
+        const url = 'https://akstest.apendo.se/auth/realms/camunda-platform/protocol/openid-connect/token';
+        const data = {
+            grant_type: 'client_credentials',
+            audience: 'optimize-api',
+            client_id: 'optimize',
+            client_secret: '27GvKmDpnf'
+        };
+        const response = await axios_1.default.post(url, new URLSearchParams(data).toString(), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
         if (response.status === 200) {
@@ -84,7 +114,7 @@ const exportReportData = async (token) => {
 const writeOptimizeEntityToFile = async (optimizeEntityData) => {
     try {
         // Write to json
-        const filename = 'response_data.json';
+        const filename = 'exported_optimize_entities.json';
         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
             if (err) {
                 console.error('Error writing file:', err);
@@ -129,12 +159,30 @@ const importReportData = async (token, data) => {
         console.error('Error:', error);
     }
 };
+const getReportIdsSm = async (token) => {
+    const url = 'https://akstest.apendo.se/optimize/api/public/report?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
+    const data = {};
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+    try {
+        const response = await axios_1.default.get(url, { headers });
+        console.log('Response:', JSON.stringify(response.data, null, 2));
+    }
+    catch (error) {
+        console.error('Error:', error);
+    }
+};
 const runWorkflow = async () => {
     try {
-        const token = await getToken();
-        const reportData = await exportReportData(token);
-        await writeOptimizeEntityToFile(reportData);
-        await importReportData(token, reportData);
+        // const token = await getTokenCloud();
+        // const reportData = await exportReportData(token)
+        // await writeOptimizeEntityToFile(reportData)
+        // await importReportData(token, reportData)
+        const token = await getTokenSelfManaged();
+        console.log(`SM TOKEN: ${token}`);
+        await getReportIdsSm(token);
     }
     catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

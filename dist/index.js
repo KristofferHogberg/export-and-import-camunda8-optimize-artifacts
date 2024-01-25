@@ -129,7 +129,7 @@ const getOptimizeReportIds = async (token) => {
     }
 };
 // TODO: Add cluster id as an action input, get report ids from http request,
-const exportDashboardData = async (token, reportIds) => {
+const exportDashboardDefinitions = async (token, reportIds) => {
     // const url = 'https://akstest.apendo.se/optimize/api/public/export/dashboard/definition/json'
     const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/dashboard/report/definition/json';
     const headers = {
@@ -161,7 +161,7 @@ const exportReportDefinitions = async (token, reportIds) => {
     }
 };
 //  TODO: Add collection id as action input.
-const importReportDefinitions = async (token, data) => {
+const importOptimizeDefinitions = async (token, optimizeEntityDefinitionsData) => {
     // const url = 'https://akstest.apendo.se/optimize/api/public/import?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
     const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/import?collectionId=0fac1778-5c82-4425-900a-921df321a499';
     const headers = {
@@ -169,7 +169,7 @@ const importReportDefinitions = async (token, data) => {
         'Authorization': `Bearer ${token}`
     };
     try {
-        const response = await axios_1.default.post(url, data, { headers });
+        const response = await axios_1.default.post(url, optimizeEntityDefinitionsData, { headers });
         console.log('Response:', JSON.stringify(response.data, null, 2));
     }
     catch (error) {
@@ -206,13 +206,13 @@ const runWorkflow = async () => {
         // const tokenSM = await getTokenSelfManaged()
         // const reportIds = await getOptimizeReportIds(tokenSM)
         const reportIds = await getOptimizeReportIds(tokenCloud);
-        const dashboardIds = await getOptimizeDashboardIds(tokenCloud);
+        // const dashboardIds = await getOptimizeDashboardIds(tokenCloud)
         // const dashboardIds = await getOptimizeDashboardIds(tokenSM)
-        // const reportData = await exportReportDefinitions(tokenSM, reportIds)
-        const reportData = await exportReportDefinitions(tokenCloud, reportIds);
-        await writeOptimizeEntityToFile(reportData);
-        await importReportDefinitions(tokenCloud, reportData);
-        // await importReportDefinitions(tokenSM, reportData)
+        // const reportDefinitions = await exportReportDefinitions(tokenSM, reportIds)
+        const reportDefinitions = await exportReportDefinitions(tokenCloud, reportIds);
+        await writeOptimizeEntityToFile(reportDefinitions);
+        await importOptimizeDefinitions(tokenCloud, reportDefinitions);
+        // await importOptimizeDefinitions(tokenSM, reportDefinitions)
         // console.log('Report IDs: ', JSON.stringify(reportIds, null, 2));
         // console.log('Report IDs: ', JSON.stringify(dashboardIds, null, 2));
     }

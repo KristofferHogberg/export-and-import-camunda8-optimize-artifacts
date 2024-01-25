@@ -76,14 +76,40 @@ const getTokenSelfManaged = async () => {
     }
 }
 
+// TODO: Get url from gh input
+const getOptimizeReportIds = async (token: string) => {
+    // const url = 'https://akstest.apendo.se/optimize/api/public/report?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
+    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/report?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+    const data = {}
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
 
-const exportReportData = async (token: string) => {
+    try {
+
+        const response = await axios.get(url, {headers});
+        // Extract the IDs from the response data
+        // Adjust the mapping based on the actual structure of response.data
+         // Assuming each report object has an 'id' field
+        return response.data.map((report: { id: any; }) => report.id)
+
+        // const response: AxiosResponse = await axios.get(url, {headers});
+        // return response.data
+
+    } catch (error) {
+        console.error('Error:', error);
+    }
+
+}
+
+const exportReportData = async (token: string, reportIds: string[]) => {
     // TODO: Add cluster id as an action input, get report ids from http request,
     const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/report/definition/json';
-    const data = [
-        "3576b30e-63bd-402e-a656-a0bc7d1bf73a",
-        "ff80541e-8bd9-40f6-90ee-ce888b408e20"
-    ];
+    // const data = [
+    //     "3576b30e-63bd-402e-a656-a0bc7d1bf73a",
+    //     "ff80541e-8bd9-40f6-90ee-ce888b408e20"
+    // ];
 
     const headers = {
         'Content-Type': 'application/json',
@@ -91,7 +117,7 @@ const exportReportData = async (token: string) => {
     };
 
     try {
-        const response: AxiosResponse = await axios.post(url, data, {headers});
+        const response: AxiosResponse = await axios.post(url, reportIds, {headers});
 
 
         return response.data;
@@ -100,6 +126,25 @@ const exportReportData = async (token: string) => {
         console.error('Error:', error);
     }
 };
+
+const importReportData = async (token: string, data: any) => {
+    //  TODO: Add collection id as action input.
+    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/import?collectionId=0fac1778-5c82-4425-900a-921df321a499';
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+
+    try {
+        const response: AxiosResponse = await axios.post(url, data, {headers});
+        console.log('Response:', JSON.stringify(response.data, null, 2));
+
+    } catch (error) {
+        console.error('Error:', error);
+    }
+
+}
 
 const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
     try {
@@ -139,62 +184,19 @@ const readOptimizeEntityFromFile = async (optimizeEntityData: any) => {
 
 }
 
-
-const importReportData = async (token: string, data: any) => {
-    //  TODO: Add collection id as action input.
-    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/import?collectionId=0fac1778-5c82-4425-900a-921df321a499';
-
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-    };
-
-    try {
-        const response: AxiosResponse = await axios.post(url, data, {headers});
-        console.log('Response:', JSON.stringify(response.data, null, 2));
-
-    } catch (error) {
-        console.error('Error:', error);
-    }
-
-}
-
-// TODO: Get url from gh input
-const getOptimizeReportIds = async (token: string) => {
-    // const url = 'https://akstest.apendo.se/optimize/api/public/report?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
-    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/report?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
-    const data = {}
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-    };
-
-    try {
-        const response: AxiosResponse = await axios.get(url, {headers});
-        return response.data
-
-    } catch (error) {
-        console.error('Error:', error);
-    }
-
-}
-
 const runWorkflow = async () => {
     try {
-
         const tokenCloud = await getTokenCloud();
         // const tokenSM = await getTokenSelfManaged()
-
-        // await getOptimizeReportIds(tokenSM)
+        // const reportIds = await getOptimizeReportIds(tokenSM)
         const reportIds = await getOptimizeReportIds(tokenCloud)
-        console.log('Report IDs: ', JSON.stringify(reportIds, null, 2));
+        // console.log(`REPORT IDS: ${reportIds}`)
+        // console.log('Report IDs: ', JSON.stringify(reportIds, null, 2));
 
-        // const reportData = await exportReportData(tokenCloud)
-        //
-        // await writeOptimizeEntityToFile(reportData)
-        //
-        // await importReportData(tokenCloud, reportData)
+        const reportData = await exportReportData(tokenCloud, reportIds)
 
+        await writeOptimizeEntityToFile(reportData)
+        await importReportData(tokenCloud, reportData)
 
     } catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

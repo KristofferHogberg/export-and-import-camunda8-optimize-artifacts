@@ -98,6 +98,7 @@ const getTokenSelfManaged = async () => {
 };
 // TODO: Get url from gh input
 const getOptimizeDashboardIds = async (token) => {
+    // const url = 'https://akstest.apendo.se/optimize/api/public/dashboard?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
     const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/dashboard?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
     const headers = {
         'Content-Type': 'application/json',
@@ -105,9 +106,6 @@ const getOptimizeDashboardIds = async (token) => {
     };
     try {
         const response = await axios_1.default.get(url, { headers });
-        // Extract the IDs from the response data
-        // Adjust the mapping based on the actual structure of response.data
-        // Assuming each report object has an 'id' field
         return response.data.map((report) => report.id);
     }
     catch (error) {
@@ -116,8 +114,8 @@ const getOptimizeDashboardIds = async (token) => {
 };
 // TODO: Get url from gh input
 const getOptimizeReportIds = async (token) => {
-    const url = 'https://akstest.apendo.se/optimize/api/public/report?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
-    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/report?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+    // const url = 'https://akstest.apendo.se/optimize/api/public/report?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
+    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/report?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -132,8 +130,8 @@ const getOptimizeReportIds = async (token) => {
 };
 const exportReportData = async (token, reportIds) => {
     // TODO: Add cluster id as an action input, get report ids from http request,
-    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/report/definition/json'
-    const url = 'https://akstest.apendo.se/optimize/api/public/export/report/definition/json';
+    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/report/definition/json';
+    // const url = 'https://akstest.apendo.se/optimize/api/public/export/report/definition/json'
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -148,8 +146,8 @@ const exportReportData = async (token, reportIds) => {
 };
 const importReportData = async (token, data) => {
     //  TODO: Add collection id as action input.
-    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/import?collectionId=0fac1778-5c82-4425-900a-921df321a499';
-    const url = 'https://akstest.apendo.se/optimize/api/public/import?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
+    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/import?collectionId=0fac1778-5c82-4425-900a-921df321a499';
+    // const url = 'https://akstest.apendo.se/optimize/api/public/import?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -181,15 +179,6 @@ const writeOptimizeEntityToFile = async (optimizeEntityData) => {
 };
 const readOptimizeEntityFromFile = async (optimizeEntityData) => {
     try {
-        // Write to json
-        // const filename = 'response_data.json';
-        // fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
-        //     if (err) {
-        //         console.error('Error writing file:', err);
-        //     } else {
-        //         console.log(`Data written to file ${filename}`);
-        //     }
-        // });
     }
     catch (error) {
         console.error('Error:', error);
@@ -197,17 +186,19 @@ const readOptimizeEntityFromFile = async (optimizeEntityData) => {
 };
 const runWorkflow = async () => {
     try {
-        // const tokenCloud = await getTokenCloud();
-        const tokenSM = await getTokenSelfManaged();
-        const reportIds = await getOptimizeReportIds(tokenSM);
+        const tokenCloud = await getTokenCloud();
+        // const tokenSM = await getTokenSelfManaged()
+        // const reportIds = await getOptimizeReportIds(tokenSM)
         // const reportIds = await getOptimizeReportIds(tokenCloud)
-        // const dashboardIds = await getOptimizeDashboardIds(tokenCloud)
-        const reportData = await exportReportData(tokenSM, reportIds);
+        const dashboardIds = await getOptimizeDashboardIds(tokenCloud);
+        // const dashboardIds = await getOptimizeDashboardIds(tokenSM)
+        // const reportData = await exportReportData(tokenSM, reportIds)
         // const reportData = await exportReportData(tokenCloud, reportIds)
         // await writeOptimizeEntityToFile(reportData)
         // await importReportData(tokenCloud, reportData)
-        await importReportData(tokenSM, reportData);
+        // await importReportData(tokenSM, reportData)
         // console.log('Report IDs: ', JSON.stringify(reportIds, null, 2));
+        console.log('Report IDs: ', JSON.stringify(dashboardIds, null, 2));
     }
     catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

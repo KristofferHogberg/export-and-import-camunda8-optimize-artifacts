@@ -5,8 +5,22 @@ import dotenv from 'dotenv';
 // TODO: Remove after running on GitHub runner.
 dotenv.config();
 
-let CONNECTION_TYPE = 'self-managed'
-let TOKEN = ''
+
+let TOKEN = '';
+let CONNECTION_TYPE = 'self-managed';
+// let CONNECTION_TYPE = 'cloud';
+
+const BASE_ADDRESS = 'https://akstest.apendo.se/optimize'
+// const BASE_ADDRESS = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce';
+
+// SELF-MANAGED
+const COLLECTION_ID_SOURCE = 'bb74ffa1-b15c-4169-983a-da4bd826c041';
+const COLLECTION_ID_DESTINATION = '6c1aecaf-30a3-4e2a-8a0e-c466e62b61ce';
+
+// CLOUD
+// const COLLECTION_ID_SOURCE = '73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+// const COLLECTION_ID_DESTINATION = '0fac1778-5c82-4425-900a-921df321a499';
+
 const getTokenCloud = async () => {
     try {
         const url = 'https://login.cloud.camunda.io/oauth/token';
@@ -78,10 +92,8 @@ const getTokenSelfManaged = async () => {
     }
 }
 
-// TODO: Get url from gh input
 const getOptimizeDashboardIds = async (token: string) => {
-    const url = 'https://akstest.apendo.se/optimize/api/public/dashboard?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
-    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/dashboard?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+    const url = `${BASE_ADDRESS}/api/public/dashboard?collectionId=${COLLECTION_ID_SOURCE}`;
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -97,10 +109,8 @@ const getOptimizeDashboardIds = async (token: string) => {
 
 }
 
-// TODO: Get url from gh input
 const getOptimizeReportIds = async (token: string) => {
-    const url = 'https://akstest.apendo.se/optimize/api/public/report?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
-    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/report?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+    const url = `${BASE_ADDRESS}/api/public/report?collectionId=${COLLECTION_ID_SOURCE}`;
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -116,10 +126,8 @@ const getOptimizeReportIds = async (token: string) => {
 
 }
 
-// TODO: Add cluster id as an action input, get report ids from http request,
 const exportDashboardDefinitions = async (token: string, reportIds: string[]) => {
-    const url = 'https://akstest.apendo.se/optimize/api/public/export/dashboard/definition/json'
-    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/dashboard/definition/json'
+    const url = `${BASE_ADDRESS}/api/public/export/dashboard/definition/json`
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -134,10 +142,8 @@ const exportDashboardDefinitions = async (token: string, reportIds: string[]) =>
     }
 };
 
-// TODO: Add cluster id as an action input, get report ids from http request,
 const exportReportDefinitions = async (token: string, reportIds: string[]) => {
-    const url = 'https://akstest.apendo.se/optimize/api/public/export/report/definition/json'
-    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/report/definition/json'
+    const url = `${BASE_ADDRESS}/api/public/export/report/definition/json`
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -152,10 +158,8 @@ const exportReportDefinitions = async (token: string, reportIds: string[]) => {
     }
 };
 
-//  TODO: Add collection id as action input.
 const importOptimizeDefinitions = async (token: string, optimizeEntityDefinitionsData: any) => {
-    const url = 'https://akstest.apendo.se/optimize/api/public/import?collectionId=6c1aecaf-30a3-4e2a-8a0e-c466e62b61ce';
-    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/import?collectionId=0fac1778-5c82-4425-900a-921df321a499';
+    const url = `${BASE_ADDRESS}/api/public/import?collectionId=${COLLECTION_ID_DESTINATION}`;
 
     const headers = {
         'Content-Type': 'application/json',
@@ -231,7 +235,7 @@ const runWorkflow = async () => {
         // await importOptimizeDefinitions(TOKEN, dashboardDefinitions)
         await importOptimizeDefinitions(TOKEN, reportDefinitions)
 
-        // console.log('Dashboard Definitions: : ', JSON.stringify(dashboardDefinitions, null, 2));
+        // console.log('Dashboard Definitions: : ', JSON.stringify(reportIds, null, 2));
 
     } catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

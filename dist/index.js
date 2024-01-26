@@ -28,6 +28,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const fs = __importStar(require("fs")); // Import the file system module
+const node_path_1 = __importDefault(require("node:path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 // TODO: Remove after running on GitHub runner.
 dotenv_1.default.config();
@@ -175,9 +176,31 @@ const importOptimizeDefinitions = async (token, optimizeEntityDefinitionsData) =
         console.error('Error:', error);
     }
 };
+// const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
+//     try {
+//         const filename = 'exported_optimize_entities.json';
+//         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
+//             if (err) {
+//                 console.error('Error writing file:', err);
+//             } else {
+//                 console.log(`Data written to file ${filename}`);
+//             }
+//         });
+//
+//
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+//
+// }
 const writeOptimizeEntityToFile = async (optimizeEntityData) => {
     try {
-        const filename = 'exported_optimize_entities.json';
+        const directory = node_path_1.default.join(__dirname, 'optimize'); // Sets the directory to 'project root/optimize'
+        const filename = node_path_1.default.join(directory, 'exported_optimize_entities.json'); // Full path to the file
+        // Create the directory if it doesn't exist
+        if (!fs.existsSync(directory)) {
+            fs.mkdirSync(directory, { recursive: true });
+        }
         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
             if (err) {
                 console.error('Error writing file:', err);

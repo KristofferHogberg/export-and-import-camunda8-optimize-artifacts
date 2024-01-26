@@ -1,5 +1,6 @@
 import axios, {AxiosResponse} from 'axios';
 import * as fs from 'fs'; // Import the file system module
+import path from "node:path";
 import dotenv from 'dotenv';
 
 // TODO: Remove after running on GitHub runner.
@@ -176,9 +177,35 @@ const importOptimizeDefinitions = async (token: string, optimizeEntityDefinition
 
 }
 
+// const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
+//     try {
+//         const filename = 'exported_optimize_entities.json';
+//         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
+//             if (err) {
+//                 console.error('Error writing file:', err);
+//             } else {
+//                 console.log(`Data written to file ${filename}`);
+//             }
+//         });
+//
+//
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+//
+// }
+
+// TODO: Fix output folder in project root instead of ./dist/optimize/
 const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
     try {
-        const filename = 'exported_optimize_entities.json';
+        const directory = path.join(__dirname, 'optimize'); // Sets the directory to 'project root/optimize'
+        const filename = path.join(directory, 'exported_optimize_entities.json'); // Full path to the file
+
+        // Create the directory if it doesn't exist
+        if (!fs.existsSync(directory)) {
+            fs.mkdirSync(directory, {recursive: true});
+        }
+
         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
             if (err) {
                 console.error('Error writing file:', err);
@@ -187,12 +214,11 @@ const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
             }
         });
 
-
     } catch (error) {
         console.error('Error:', error);
     }
+};
 
-}
 
 const readOptimizeEntityFromFile = async (optimizeEntityData: any) => {
     try {

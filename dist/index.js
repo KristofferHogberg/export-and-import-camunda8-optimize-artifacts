@@ -31,7 +31,8 @@ const fs = __importStar(require("fs")); // Import the file system module
 const dotenv_1 = __importDefault(require("dotenv"));
 // TODO: Remove after running on GitHub runner.
 dotenv_1.default.config();
-//TODO: Add Url and credentials from gh inputs.
+let CONNECTION_TYPE = 'self-managed';
+let TOKEN = '';
 const getTokenCloud = async () => {
     try {
         const url = 'https://login.cloud.camunda.io/oauth/token';
@@ -61,7 +62,6 @@ const getTokenCloud = async () => {
         // return null;
     }
 };
-//TODO: Add Url and credentials from gh inputs. FIX data "undefined"
 const getTokenSelfManaged = async () => {
     try {
         const url = 'https://akstest.apendo.se/auth/realms/camunda-platform/protocol/openid-connect/token';
@@ -98,8 +98,8 @@ const getTokenSelfManaged = async () => {
 };
 // TODO: Get url from gh input
 const getOptimizeDashboardIds = async (token) => {
-    // const url = 'https://akstest.apendo.se/optimize/api/public/dashboard?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
-    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/dashboard?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+    const url = 'https://akstest.apendo.se/optimize/api/public/dashboard?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
+    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/dashboard?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -114,8 +114,8 @@ const getOptimizeDashboardIds = async (token) => {
 };
 // TODO: Get url from gh input
 const getOptimizeReportIds = async (token) => {
-    // const url = 'https://akstest.apendo.se/optimize/api/public/report?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
-    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/report?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+    const url = 'https://akstest.apendo.se/optimize/api/public/report?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
+    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/report?collectionId=73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -130,8 +130,8 @@ const getOptimizeReportIds = async (token) => {
 };
 // TODO: Add cluster id as an action input, get report ids from http request,
 const exportDashboardDefinitions = async (token, reportIds) => {
-    // const url = 'https://akstest.apendo.se/optimize/api/public/export/dashboard/definition/json'
-    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/dashboard/definition/json';
+    const url = 'https://akstest.apendo.se/optimize/api/public/export/dashboard/definition/json';
+    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/dashboard/definition/json'
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -146,8 +146,8 @@ const exportDashboardDefinitions = async (token, reportIds) => {
 };
 // TODO: Add cluster id as an action input, get report ids from http request,
 const exportReportDefinitions = async (token, reportIds) => {
-    // const url = 'https://akstest.apendo.se/optimize/api/public/export/report/definition/json'
-    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/report/definition/json';
+    const url = 'https://akstest.apendo.se/optimize/api/public/export/report/definition/json';
+    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/export/report/definition/json'
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -162,8 +162,8 @@ const exportReportDefinitions = async (token, reportIds) => {
 };
 //  TODO: Add collection id as action input.
 const importOptimizeDefinitions = async (token, optimizeEntityDefinitionsData) => {
-    // const url = 'https://akstest.apendo.se/optimize/api/public/import?collectionId=bb74ffa1-b15c-4169-983a-da4bd826c041';
-    const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/import?collectionId=0fac1778-5c82-4425-900a-921df321a499';
+    const url = 'https://akstest.apendo.se/optimize/api/public/import?collectionId=6c1aecaf-30a3-4e2a-8a0e-c466e62b61ce';
+    // const url = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce/api/public/import?collectionId=0fac1778-5c82-4425-900a-921df321a499';
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -178,7 +178,6 @@ const importOptimizeDefinitions = async (token, optimizeEntityDefinitionsData) =
 };
 const writeOptimizeEntityToFile = async (optimizeEntityData) => {
     try {
-        // Write to json
         const filename = 'exported_optimize_entities.json';
         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
             if (err) {
@@ -202,23 +201,29 @@ const readOptimizeEntityFromFile = async (optimizeEntityData) => {
 };
 const runWorkflow = async () => {
     try {
-        const tokenCloud = await getTokenCloud();
-        // const tokenSM = await getTokenSelfManaged()
-        // const reportIds = await getOptimizeReportIds(tokenSM)
-        // const reportIds = await getOptimizeReportIds(tokenCloud)
-        const dashboardIds = await getOptimizeDashboardIds(tokenCloud);
-        // const dashboardIds = await getOptimizeDashboardIds(tokenSM)
-        const dashboardDefinitions = await exportDashboardDefinitions(tokenCloud, dashboardIds);
-        // const reportDefinitions = await exportReportDefinitions(tokenSM, reportIds)
-        // const reportDefinitions = await exportReportDefinitions(tokenCloud, reportIds)
-        // await writeOptimizeEntityToFile(reportDefinitions)
-        await writeOptimizeEntityToFile(dashboardDefinitions);
-        await importOptimizeDefinitions(tokenCloud, dashboardDefinitions);
-        // await importOptimizeDefinitions(tokenCloud, reportDefinitions)
-        // await importOptimizeDefinitions(tokenSM, reportDefinitions)
-        // console.log('Report IDs: ', JSON.stringify(reportIds, null, 2));
-        // console.log('Report IDs: ', JSON.stringify(dashboardIds, null, 2));
-        // console.log('Dashboard Defintions: : ', JSON.stringify(dashboardDefinitions, null, 2));
+        if (CONNECTION_TYPE === 'cloud') {
+            TOKEN = await getTokenCloud();
+        }
+        else if (CONNECTION_TYPE === 'self-managed') {
+            TOKEN = await getTokenSelfManaged();
+        }
+        else {
+            console.error('Invalid connection_type specified.');
+            process.exit(1);
+        }
+        if (!TOKEN) {
+            console.error('Failed to retrieve token.');
+            return; // or throw new Error('Failed to retrieve token.');
+        }
+        // const dashboardIds = await getOptimizeDashboardIds(TOKEN)
+        const reportIds = await getOptimizeReportIds(TOKEN);
+        // const dashboardDefinitions = await exportDashboardDefinitions(TOKEN, dashboardIds)
+        const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds);
+        // await writeOptimizeEntityToFile(dashboardDefinitions)
+        await writeOptimizeEntityToFile(reportDefinitions);
+        // await importOptimizeDefinitions(TOKEN, dashboardDefinitions)
+        await importOptimizeDefinitions(TOKEN, reportDefinitions);
+        // console.log('Dashboard Definitions: : ', JSON.stringify(dashboardDefinitions, null, 2));
     }
     catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

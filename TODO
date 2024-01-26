@@ -1,3 +1,4 @@
+Test all methods on self-managed
 
 Solve dynamic base address
 Solve dynamic token request
@@ -6,3 +7,17 @@ Find best export data url settings
 
 Test write files to runner file system
 Break code base in to 2 separate actions
+
+
+<<<--- INPUTS --->>>
+
+--> CONNECTION_TYPE
+
+--> URLs:
+    --> Cloud
+        --> REGION
+        --> CLUSTER_ID
+
+--> Self-Managed
+    --> BASE_ADDRESS
+    -->

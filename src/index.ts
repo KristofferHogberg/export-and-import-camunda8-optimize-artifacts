@@ -178,64 +178,17 @@ const importOptimizeDefinitions = async (token: string, optimizeEntityDefinition
 
 }
 
-// const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
-//     try {
-//         const filename = 'exported_optimize_entities.json';
-//         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
-//             if (err) {
-//                 console.error('Error writing file:', err);
-//             } else {
-//                 console.log(`Data written to file ${filename}`);
-//             }
-//         });
-//
-//
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-//
-// }
-//
-// // TODO: Fix output folder in project root instead of ./dist/optimize/
-// const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
-//     try {
-//         const directory = path.join(__dirname, 'optimize'); // Sets the directory to 'project root/optimize'
-//         const filename = path.join(directory, 'exported_optimize_entities.json'); // Full path to the file
-//
-//         // Create the directory if it doesn't exist
-//         if (!fs.existsSync(directory)) {
-//             fs.mkdirSync(directory, {recursive: true});
-//         }
-//
-//         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
-//             if (err) {
-//                 console.error('Error writing file:', err);
-//             } else {
-//                 console.log(`Data written to file ${filename}`);
-//             }
-//         });
-//
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// };
-
-// interface FileContent {
-//     metadata: {
-//         name: string;
-//     };
-//     content: string;
-// }
-
-
 const writeOptimizeEntityToFile = async (optimizeEntityData: any, destinationFolderPath: string, fileName: string): Promise<void> => {
     try {
         const destinationFilePath = path.join(destinationFolderPath, `${fileName}.json`);
-        await fsPromises.mkdir(destinationFolderPath, {recursive: true});
+
+        if (!fs.existsSync(destinationFilePath)) {
+
+            await fsPromises.mkdir(destinationFolderPath, {recursive: true});
+        }
 
         // Convert optimizeEntityData to a JSON string
-        const dataToWrite = JSON.stringify(optimizeEntityData, null, 2); // null, 2 for pretty formatting
-
+        const dataToWrite = JSON.stringify(optimizeEntityData, null, 2);
         await fsPromises.writeFile(destinationFilePath, dataToWrite);
 
         console.log(`File content saved to: ${destinationFilePath}`);

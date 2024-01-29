@@ -2,25 +2,26 @@ import axios, {AxiosResponse} from 'axios';
 import * as fs from 'fs'; // Import the file system module
 import path from "node:path";
 import dotenv from 'dotenv';
+import fsPromises from 'fs/promises';
 
 // TODO: Remove after running on GitHub runner.
 dotenv.config();
 
 
 let TOKEN = '';
-let CONNECTION_TYPE = 'self-managed';
-// let CONNECTION_TYPE = 'cloud';
+// let CONNECTION_TYPE = 'self-managed';
+let CONNECTION_TYPE = 'cloud';
 
-const BASE_ADDRESS = 'https://akstest.apendo.se/optimize'
-// const BASE_ADDRESS = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce';
+// const BASE_ADDRESS = 'https://akstest.apendo.se/optimize'
+const BASE_ADDRESS = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce';
 
 // SELF-MANAGED
-const COLLECTION_ID_SOURCE = 'bb74ffa1-b15c-4169-983a-da4bd826c041';
-const COLLECTION_ID_DESTINATION = '6c1aecaf-30a3-4e2a-8a0e-c466e62b61ce';
+// const COLLECTION_ID_SOURCE = 'bb74ffa1-b15c-4169-983a-da4bd826c041';
+// const COLLECTION_ID_DESTINATION = '6c1aecaf-30a3-4e2a-8a0e-c466e62b61ce';
 
 // CLOUD
-// const COLLECTION_ID_SOURCE = '73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
-// const COLLECTION_ID_DESTINATION = '0fac1778-5c82-4425-900a-921df321a499';
+const COLLECTION_ID_SOURCE = '73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+const COLLECTION_ID_DESTINATION = '0fac1778-5c82-4425-900a-921df321a499';
 
 const getTokenCloud = async () => {
     try {
@@ -194,28 +195,53 @@ const importOptimizeDefinitions = async (token: string, optimizeEntityDefinition
 //     }
 //
 // }
+//
+// // TODO: Fix output folder in project root instead of ./dist/optimize/
+// const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
+//     try {
+//         const directory = path.join(__dirname, 'optimize'); // Sets the directory to 'project root/optimize'
+//         const filename = path.join(directory, 'exported_optimize_entities.json'); // Full path to the file
+//
+//         // Create the directory if it doesn't exist
+//         if (!fs.existsSync(directory)) {
+//             fs.mkdirSync(directory, {recursive: true});
+//         }
+//
+//         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
+//             if (err) {
+//                 console.error('Error writing file:', err);
+//             } else {
+//                 console.log(`Data written to file ${filename}`);
+//             }
+//         });
+//
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// };
 
-// TODO: Fix output folder in project root instead of ./dist/optimize/
-const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
+// interface FileContent {
+//     metadata: {
+//         name: string;
+//     };
+//     content: string;
+// }
+
+
+const writeOptimizeEntityToFile = async (optimizeEntityData: any, destinationFolderPath: string, fileName: string): Promise<void> => {
     try {
-        const directory = path.join(__dirname, 'optimize'); // Sets the directory to 'project root/optimize'
-        const filename = path.join(directory, 'exported_optimize_entities.json'); // Full path to the file
+        const destinationFilePath = path.join(destinationFolderPath, `${fileName}.json`);
+        await fsPromises.mkdir(destinationFolderPath, {recursive: true});
 
-        // Create the directory if it doesn't exist
-        if (!fs.existsSync(directory)) {
-            fs.mkdirSync(directory, {recursive: true});
-        }
+        // Convert optimizeEntityData to a JSON string
+        const dataToWrite = JSON.stringify(optimizeEntityData, null, 2); // null, 2 for pretty formatting
 
-        fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
-            if (err) {
-                console.error('Error writing file:', err);
-            } else {
-                console.log(`Data written to file ${filename}`);
-            }
-        });
+        await fsPromises.writeFile(destinationFilePath, dataToWrite);
 
+        console.log(`File content saved to: ${destinationFilePath}`);
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error writing file:', error);
+        // setFailed(error instanceof Error ? error.message : 'An error occurred');
     }
 };
 
@@ -256,7 +282,7 @@ const runWorkflow = async () => {
         const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds)
 
         // await writeOptimizeEntityToFile(dashboardDefinitions)
-        await writeOptimizeEntityToFile(reportDefinitions)
+        await writeOptimizeEntityToFile(reportDefinitions, 'optimize', 'optimize_entities')
 
         // await importOptimizeDefinitions(TOKEN, dashboardDefinitions)
         await importOptimizeDefinitions(TOKEN, reportDefinitions)

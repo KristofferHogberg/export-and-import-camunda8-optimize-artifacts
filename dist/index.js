@@ -1,48 +1,25 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
-const fs = __importStar(require("fs")); // Import the file system module
 const node_path_1 = __importDefault(require("node:path"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const promises_1 = __importDefault(require("fs/promises"));
 // TODO: Remove after running on GitHub runner.
 dotenv_1.default.config();
 let TOKEN = '';
-let CONNECTION_TYPE = 'self-managed';
-// let CONNECTION_TYPE = 'cloud';
-const BASE_ADDRESS = 'https://akstest.apendo.se/optimize';
-// const BASE_ADDRESS = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce';
+// let CONNECTION_TYPE = 'self-managed';
+let CONNECTION_TYPE = 'cloud';
+// const BASE_ADDRESS = 'https://akstest.apendo.se/optimize'
+const BASE_ADDRESS = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce';
 // SELF-MANAGED
-const COLLECTION_ID_SOURCE = 'bb74ffa1-b15c-4169-983a-da4bd826c041';
-const COLLECTION_ID_DESTINATION = '6c1aecaf-30a3-4e2a-8a0e-c466e62b61ce';
+// const COLLECTION_ID_SOURCE = 'bb74ffa1-b15c-4169-983a-da4bd826c041';
+// const COLLECTION_ID_DESTINATION = '6c1aecaf-30a3-4e2a-8a0e-c466e62b61ce';
 // CLOUD
-// const COLLECTION_ID_SOURCE = '73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
-// const COLLECTION_ID_DESTINATION = '0fac1778-5c82-4425-900a-921df321a499';
+const COLLECTION_ID_SOURCE = '73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+const COLLECTION_ID_DESTINATION = '0fac1778-5c82-4425-900a-921df321a499';
 const getTokenCloud = async () => {
     try {
         const url = 'https://login.cloud.camunda.io/oauth/token';
@@ -193,25 +170,48 @@ const importOptimizeDefinitions = async (token, optimizeEntityDefinitionsData) =
 //     }
 //
 // }
-const writeOptimizeEntityToFile = async (optimizeEntityData) => {
+//
+// // TODO: Fix output folder in project root instead of ./dist/optimize/
+// const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
+//     try {
+//         const directory = path.join(__dirname, 'optimize'); // Sets the directory to 'project root/optimize'
+//         const filename = path.join(directory, 'exported_optimize_entities.json'); // Full path to the file
+//
+//         // Create the directory if it doesn't exist
+//         if (!fs.existsSync(directory)) {
+//             fs.mkdirSync(directory, {recursive: true});
+//         }
+//
+//         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
+//             if (err) {
+//                 console.error('Error writing file:', err);
+//             } else {
+//                 console.log(`Data written to file ${filename}`);
+//             }
+//         });
+//
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// };
+// interface FileContent {
+//     metadata: {
+//         name: string;
+//     };
+//     content: string;
+// }
+const writeOptimizeEntityToFile = async (optimizeEntityData, destinationFolderPath, fileName) => {
     try {
-        const directory = node_path_1.default.join(__dirname, 'optimize'); // Sets the directory to 'project root/optimize'
-        const filename = node_path_1.default.join(directory, 'exported_optimize_entities.json'); // Full path to the file
-        // Create the directory if it doesn't exist
-        if (!fs.existsSync(directory)) {
-            fs.mkdirSync(directory, { recursive: true });
-        }
-        fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
-            if (err) {
-                console.error('Error writing file:', err);
-            }
-            else {
-                console.log(`Data written to file ${filename}`);
-            }
-        });
+        const destinationFilePath = node_path_1.default.join(destinationFolderPath, `${fileName}.json`);
+        await promises_1.default.mkdir(destinationFolderPath, { recursive: true });
+        // Convert optimizeEntityData to a JSON string
+        const dataToWrite = JSON.stringify(optimizeEntityData, null, 2); // null, 2 for pretty formatting
+        await promises_1.default.writeFile(destinationFilePath, dataToWrite);
+        console.log(`File content saved to: ${destinationFilePath}`);
     }
     catch (error) {
-        console.error('Error:', error);
+        console.error('Error writing file:', error);
+        // setFailed(error instanceof Error ? error.message : 'An error occurred');
     }
 };
 const readOptimizeEntityFromFile = async (optimizeEntityData) => {
@@ -242,7 +242,7 @@ const runWorkflow = async () => {
         // const dashboardDefinitions = await exportDashboardDefinitions(TOKEN, dashboardIds)
         const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds);
         // await writeOptimizeEntityToFile(dashboardDefinitions)
-        await writeOptimizeEntityToFile(reportDefinitions);
+        await writeOptimizeEntityToFile(reportDefinitions, 'optimize', 'optimize_entities');
         // await importOptimizeDefinitions(TOKEN, dashboardDefinitions)
         await importOptimizeDefinitions(TOKEN, reportDefinitions);
         // console.log('Dashboard Definitions: : ', JSON.stringify(reportIds, null, 2));

@@ -177,53 +177,6 @@ const importOptimizeDefinitions = async (token, optimizeEntityDefinitionsData) =
         console.error('Error:', error);
     }
 };
-// const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
-//     try {
-//         const filename = 'exported_optimize_entities.json';
-//         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
-//             if (err) {
-//                 console.error('Error writing file:', err);
-//             } else {
-//                 console.log(`Data written to file ${filename}`);
-//             }
-//         });
-//
-//
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-//
-// }
-//
-// // TODO: Fix output folder in project root instead of ./dist/optimize/
-// const writeOptimizeEntityToFile = async (optimizeEntityData: any) => {
-//     try {
-//         const directory = path.join(__dirname, 'optimize'); // Sets the directory to 'project root/optimize'
-//         const filename = path.join(directory, 'exported_optimize_entities.json'); // Full path to the file
-//
-//         // Create the directory if it doesn't exist
-//         if (!fs.existsSync(directory)) {
-//             fs.mkdirSync(directory, {recursive: true});
-//         }
-//
-//         fs.writeFile(filename, JSON.stringify(optimizeEntityData, null, 2), 'utf8', (err) => {
-//             if (err) {
-//                 console.error('Error writing file:', err);
-//             } else {
-//                 console.log(`Data written to file ${filename}`);
-//             }
-//         });
-//
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// };
-// interface FileContent {
-//     metadata: {
-//         name: string;
-//     };
-//     content: string;
-// }
 const writeOptimizeEntityToFile = async (optimizeEntityData, destinationFolderPath, fileName) => {
     try {
         const destinationFilePath = node_path_1.default.join(destinationFolderPath, `${fileName}.json`);
@@ -240,8 +193,18 @@ const writeOptimizeEntityToFile = async (optimizeEntityData, destinationFolderPa
         // setFailed(error instanceof Error ? error.message : 'An error occurred');
     }
 };
-const readOptimizeEntityFromFile = async (optimizeEntityData) => {
+const readOptimizeEntityFromFile = async (sourceFilePath) => {
     try {
+        if (!fs.existsSync(sourceFilePath)) {
+            console.log(`Can't find file at: ${sourceFilePath}`);
+            return;
+        }
+        const fileContent = await promises_1.default.readFile(sourceFilePath, 'utf8');
+        if (!fileContent) {
+            console.log(`File at ${sourceFilePath} is empty.`);
+            return;
+        }
+        return JSON.parse(fileContent);
     }
     catch (error) {
         console.error('Error:', error);
@@ -264,14 +227,15 @@ const runWorkflow = async () => {
             return; // or throw new Error('Failed to retrieve token.');
         }
         // const dashboardIds = await getOptimizeDashboardIds(TOKEN)
-        const reportIds = await getOptimizeReportIds(TOKEN);
+        // const reportIds = await getOptimizeReportIds(TOKEN)
         // const dashboardDefinitions = await exportDashboardDefinitions(TOKEN, dashboardIds)
-        const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds);
+        // const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds)
         // await writeOptimizeEntityToFile(dashboardDefinitions)
-        await writeOptimizeEntityToFile(reportDefinitions, 'optimize', 'optimize_entities');
+        // await writeOptimizeEntityToFile(reportDefinitions, 'optimize', 'optimize_entities')
+        const optimizeDataFromFile = await readOptimizeEntityFromFile('optimize/optimize_entities.json');
         // await importOptimizeDefinitions(TOKEN, dashboardDefinitions)
-        await importOptimizeDefinitions(TOKEN, reportDefinitions);
-        // console.log('Dashboard Definitions: : ', JSON.stringify(reportIds, null, 2));
+        // await importOptimizeDefinitions(TOKEN, reportDefinitions)
+        console.log('Dashboard Definitions: : ', JSON.stringify(optimizeDataFromFile, null, 2));
     }
     catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

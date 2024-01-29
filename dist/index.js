@@ -177,9 +177,10 @@ const importOptimizeDefinitions = async (token, optimizeEntityDefinitionsData) =
         console.error('Error:', error);
     }
 };
-const writeOptimizeEntityToFile = async (optimizeEntityData, destinationFolderPath, fileName) => {
+const writeOptimizeEntityToFile = async (optimizeEntityData, destinationFolderPath) => {
     try {
-        const destinationFilePath = node_path_1.default.join(destinationFolderPath, `${fileName}.json`);
+        const fileName = 'optimize-entities.json';
+        const destinationFilePath = node_path_1.default.join(destinationFolderPath, `${fileName}`);
         if (!fs.existsSync(destinationFilePath)) {
             await promises_1.default.mkdir(destinationFolderPath, { recursive: true });
         }
@@ -193,15 +194,17 @@ const writeOptimizeEntityToFile = async (optimizeEntityData, destinationFolderPa
         // setFailed(error instanceof Error ? error.message : 'An error occurred');
     }
 };
-const readOptimizeEntityFromFile = async (sourceFilePath) => {
+const readOptimizeEntityFromFile = async (destinationFolderPath) => {
     try {
-        if (!fs.existsSync(sourceFilePath)) {
-            console.log(`Can't find file at: ${sourceFilePath}`);
+        const fileName = 'optimize-entities.json';
+        const destinationFilePath = node_path_1.default.join(destinationFolderPath, `${fileName}`);
+        if (!fs.existsSync(destinationFilePath)) {
+            console.log(`Can't find file at: ${destinationFilePath}`);
             return;
         }
-        const fileContent = await promises_1.default.readFile(sourceFilePath, 'utf8');
+        const fileContent = await promises_1.default.readFile(destinationFilePath, 'utf8');
         if (!fileContent) {
-            console.log(`File at ${sourceFilePath} is empty.`);
+            console.log(`File at ${destinationFilePath} is empty.`);
             return;
         }
         return JSON.parse(fileContent);
@@ -227,15 +230,16 @@ const runWorkflow = async () => {
             return; // or throw new Error('Failed to retrieve token.');
         }
         // const dashboardIds = await getOptimizeDashboardIds(TOKEN)
-        // const reportIds = await getOptimizeReportIds(TOKEN)
+        const reportIds = await getOptimizeReportIds(TOKEN);
         // const dashboardDefinitions = await exportDashboardDefinitions(TOKEN, dashboardIds)
-        // const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds)
+        const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds);
         // await writeOptimizeEntityToFile(dashboardDefinitions)
-        // await writeOptimizeEntityToFile(reportDefinitions, 'optimize', 'optimize_entities')
-        const optimizeDataFromFile = await readOptimizeEntityFromFile('optimize/optimize_entities.json');
+        await writeOptimizeEntityToFile(reportDefinitions, 'optimize');
+        const optimizeDataFromFile = await readOptimizeEntityFromFile('optimize');
         // await importOptimizeDefinitions(TOKEN, dashboardDefinitions)
         // await importOptimizeDefinitions(TOKEN, reportDefinitions)
-        console.log('Dashboard Definitions: : ', JSON.stringify(optimizeDataFromFile, null, 2));
+        await importOptimizeDefinitions(TOKEN, reportDefinitions);
+        // console.log('Dashboard Definitions: : ', JSON.stringify(optimizeDataFromFile, null, 2));
     }
     catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

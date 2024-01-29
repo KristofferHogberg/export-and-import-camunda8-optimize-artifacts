@@ -178,9 +178,10 @@ const importOptimizeDefinitions = async (token: string, optimizeEntityDefinition
 
 }
 
-const writeOptimizeEntityToFile = async (optimizeEntityData: any, destinationFolderPath: string, fileName: string): Promise<void> => {
+const writeOptimizeEntityToFile = async (optimizeEntityData: any, destinationFolderPath: string): Promise<void> => {
     try {
-        const destinationFilePath = path.join(destinationFolderPath, `${fileName}.json`);
+        const fileName = 'optimize-entities.json'
+        const destinationFilePath = path.join(destinationFolderPath, `${fileName}`);
 
         if (!fs.existsSync(destinationFilePath)) {
 
@@ -199,16 +200,19 @@ const writeOptimizeEntityToFile = async (optimizeEntityData: any, destinationFol
 };
 
 
-const readOptimizeEntityFromFile = async (sourceFilePath: string) => {
+const readOptimizeEntityFromFile = async (destinationFolderPath: string) => {
     try {
-        if (!fs.existsSync(sourceFilePath)) {
-            console.log(`Can't find file at: ${sourceFilePath}`);
+        const fileName = 'optimize-entities.json'
+        const destinationFilePath = path.join(destinationFolderPath, `${fileName}`);
+
+        if (!fs.existsSync(destinationFilePath)) {
+            console.log(`Can't find file at: ${destinationFilePath}`);
             return;
         }
 
-        const fileContent = await fsPromises.readFile(sourceFilePath, 'utf8');
+        const fileContent = await fsPromises.readFile(destinationFilePath, 'utf8');
         if (!fileContent) {
-            console.log(`File at ${sourceFilePath} is empty.`);
+            console.log(`File at ${destinationFilePath} is empty.`);
             return;
         }
 
@@ -240,21 +244,21 @@ const runWorkflow = async () => {
         }
 
         // const dashboardIds = await getOptimizeDashboardIds(TOKEN)
-        // const reportIds = await getOptimizeReportIds(TOKEN)
+        const reportIds = await getOptimizeReportIds(TOKEN)
 
         // const dashboardDefinitions = await exportDashboardDefinitions(TOKEN, dashboardIds)
-        // const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds)
+        const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds)
 
         // await writeOptimizeEntityToFile(dashboardDefinitions)
-        // await writeOptimizeEntityToFile(reportDefinitions, 'optimize', 'optimize_entities')
+        await writeOptimizeEntityToFile(reportDefinitions, 'optimize')
 
-
-        const optimizeDataFromFile = await readOptimizeEntityFromFile('optimize/optimize_entities.json');
+        const optimizeDataFromFile = await readOptimizeEntityFromFile('optimize');
 
         // await importOptimizeDefinitions(TOKEN, dashboardDefinitions)
         // await importOptimizeDefinitions(TOKEN, reportDefinitions)
+        await importOptimizeDefinitions(TOKEN, reportDefinitions)
 
-        console.log('Dashboard Definitions: : ', JSON.stringify(optimizeDataFromFile, null, 2));
+        // console.log('Dashboard Definitions: : ', JSON.stringify(optimizeDataFromFile, null, 2));
 
     } catch (error) {
         // setFailed(error instanceof Error ? error.message : 'An error occurred');

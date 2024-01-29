@@ -7,7 +7,7 @@ import fsPromises from 'fs/promises';
 // TODO: Remove after running on GitHub runner.
 dotenv.config();
 
-
+// TODO: Add connection type if statement in every method.
 let TOKEN = '';
 let CONNECTION_TYPE = 'self-managed';
 // let CONNECTION_TYPE = 'cloud';
@@ -237,20 +237,19 @@ const runWorkflow = async () => {
             return; // or throw new Error('Failed to retrieve token.');
         }
 
-        // const dashboardIds = await getOptimizeDashboardIds(TOKEN)
-        const reportIds = await getOptimizeReportIds(TOKEN)
+        const dashboardIds = await getOptimizeDashboardIds(TOKEN)
+        // const reportIds = await getOptimizeReportIds(TOKEN)
 
-        // const dashboardDefinitions = await exportDashboardDefinitions(TOKEN, dashboardIds)
-        const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds)
+        const dashboardDefinitions = await exportDashboardDefinitions(TOKEN, dashboardIds)
+        // const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds)
 
-        // await writeOptimizeEntityToFile(dashboardDefinitions)
-        await writeOptimizeEntityToFile(reportDefinitions, 'optimize')
+        await writeOptimizeEntityToFile(dashboardDefinitions, 'optimize')
+        // await writeOptimizeEntityToFile(reportDefinitions, 'optimize')
 
         const optimizeDataFromFile = await readOptimizeEntityFromFile('optimize');
 
-        // await importOptimizeDefinitions(TOKEN, dashboardDefinitions)
+        await importOptimizeDefinitions(TOKEN, dashboardDefinitions)
         // await importOptimizeDefinitions(TOKEN, reportDefinitions)
-        await importOptimizeDefinitions(TOKEN, reportDefinitions)
 
         // console.log('Dashboard Definitions: : ', JSON.stringify(optimizeDataFromFile, null, 2));
 

@@ -1,7 +1,23 @@
-<- NOTES ->
+Test all methods on self-managed
 
-    -> Identical process definitions required in data sources.
+Solve dynamic base address
+Solve dynamic token request
 
-        In order to be able to import a an exported Optimize entity,
-        the the same process definition is required to be defined in the data source
-        importing the entity as the one it is exported from.
+Find best export data url settings
+
+Test write files to runner file system
+Break code base in to 2 separate actions
+
+
+<<<--- INPUTS --->>>
+
+--> CONNECTION_TYPE
+
+--> URLs:
+    --> Cloud
+        --> REGION
+        --> CLUSTER_ID
+
+--> Self-Managed
+    --> BASE_ADDRESS
+    -->

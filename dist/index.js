@@ -34,15 +34,15 @@ const promises_1 = __importDefault(require("fs/promises"));
 // TODO: Remove after running on GitHub runner.
 dotenv_1.default.config();
 // TODO: Add connection type if statement in every method.
-let TOKEN = '';
-let CONNECTION_TYPE = 'self-managed';
-// let CONNECTION_TYPE = 'cloud';
-const BASE_ADDRESS = 'https://akstest.apendo.se/optimize';
-// const BASE_ADDRESS = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce';
-const COLLECTION_ID_SOURCE = '0c51a9c1-33ba-4a2e-a7a1-b2b148f4a539';
-const COLLECTION_ID_DESTINATION = '204018da-092a-47ca-9492-8a4ab1cb548e';
+// let TOKEN = '';
+let CONNECTION_TYPE_SOURCE = 'self-managed';
+let CONNECTION_TYPE_DESTINATION = 'cloud';
+const BASE_ADDRESS_SOURCE = 'https://akstest.apendo.se/optimize';
+const BASE_ADDRESS_DESTINATION = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce';
+// const COLLECTION_ID_SOURCE = '0c51a9c1-33ba-4a2e-a7a1-b2b148f4a539';
+const COLLECTION_ID_DESTINATION = '0fac1778-5c82-4425-900a-921df321a499';
 // CLOUD
-// const COLLECTION_ID_SOURCE = '73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+const COLLECTION_ID_SOURCE = '0c51a9c1-33ba-4a2e-a7a1-b2b148f4a539';
 // const COLLECTION_ID_DESTINATION = '0fac1778-5c82-4425-900a-921df321a499';
 const getTokenCloud = async () => {
     try {
@@ -102,25 +102,47 @@ const getTokenSelfManaged = async () => {
         // return null;
     }
 };
-const filterTokenByConnectionType = async () => {
+const getTokenByConnectionTypeSource = async () => {
     try {
-        if (CONNECTION_TYPE === 'cloud') {
-            TOKEN = await getTokenCloud();
+        if (CONNECTION_TYPE_SOURCE === 'cloud') {
+            return await getTokenCloud();
         }
-        else if (CONNECTION_TYPE === 'self-managed') {
-            TOKEN = await getTokenSelfManaged();
+        else if (CONNECTION_TYPE_SOURCE === 'self-managed') {
+            return await getTokenSelfManaged();
         }
         else {
             console.error('Invalid connection_type specified.');
-            process.exit(1);
+            return false;
         }
     }
     catch (error) {
         console.error('Error', error);
     }
 };
-const getOptimizeDashboardIds = async (token) => {
-    const url = `${BASE_ADDRESS}/api/public/dashboard?collectionId=${COLLECTION_ID_SOURCE}`;
+const getTokenByConnectionTypeDestination = async () => {
+    try {
+        if (CONNECTION_TYPE_DESTINATION === 'cloud') {
+            return await getTokenCloud();
+        }
+        else if (CONNECTION_TYPE_DESTINATION === 'self-managed') {
+            return await getTokenSelfManaged();
+        }
+        else {
+            console.error('Invalid connection_type specified.');
+            return false;
+        }
+    }
+    catch (error) {
+        console.error('Error', error);
+    }
+};
+const getOptimizeDashboardIds = async () => {
+    const url = `${BASE_ADDRESS_SOURCE}/api/public/dashboard?collectionId=${COLLECTION_ID_SOURCE}`;
+    const token = await getTokenByConnectionTypeSource();
+    if (!token) {
+        console.error('Failed to retrieve token.');
+        return; // or throw new Error('Failed to retrieve token.');
+    }
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -133,8 +155,9 @@ const getOptimizeDashboardIds = async (token) => {
         console.error('Error:', error);
     }
 };
-const getOptimizeReportIds = async (token) => {
-    const url = `${BASE_ADDRESS}/api/public/report?collectionId=${COLLECTION_ID_SOURCE}`;
+const getOptimizeReportIds = async () => {
+    const url = `${BASE_ADDRESS_SOURCE}/api/public/report?collectionId=${COLLECTION_ID_SOURCE}`;
+    const token = await getTokenByConnectionTypeSource();
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -147,8 +170,9 @@ const getOptimizeReportIds = async (token) => {
         console.error('Error:', error);
     }
 };
-const exportDashboardDefinitions = async (token, reportIds) => {
-    const url = `${BASE_ADDRESS}/api/public/export/dashboard/definition/json`;
+const exportDashboardDefinitions = async (reportIds) => {
+    const url = `${BASE_ADDRESS_SOURCE}/api/public/export/dashboard/definition/json`;
+    const token = await getTokenByConnectionTypeSource();
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -161,8 +185,9 @@ const exportDashboardDefinitions = async (token, reportIds) => {
         console.error('Error:', error);
     }
 };
-const exportReportDefinitions = async (token, reportIds) => {
-    const url = `${BASE_ADDRESS}/api/public/export/report/definition/json`;
+const exportReportDefinitions = async (reportIds) => {
+    const url = `${BASE_ADDRESS_SOURCE}/api/public/export/report/definition/json`;
+    const token = await getTokenByConnectionTypeSource();
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -175,8 +200,9 @@ const exportReportDefinitions = async (token, reportIds) => {
         console.error('Error:', error);
     }
 };
-const importOptimizeDefinitions = async (token, optimizeEntityDefinitionsData) => {
-    const url = `${BASE_ADDRESS}/api/public/import?collectionId=${COLLECTION_ID_DESTINATION}`;
+const importOptimizeDefinitions = async (optimizeEntityDefinitionsData) => {
+    const url = `${BASE_ADDRESS_DESTINATION}/api/public/import?collectionId=${COLLECTION_ID_DESTINATION}`;
+    const token = await getTokenByConnectionTypeDestination();
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -227,32 +253,35 @@ const readOptimizeEntityFromFile = async (destinationFolderPath) => {
 };
 const runWorkflow = async () => {
     try {
-        if (CONNECTION_TYPE === 'cloud') {
-            TOKEN = await getTokenCloud();
-        }
-        else if (CONNECTION_TYPE === 'self-managed') {
-            TOKEN = await getTokenSelfManaged();
-        }
-        else {
-            console.error('Invalid connection_type specified.');
-            process.exit(1);
-        }
-        if (!TOKEN) {
-            console.error('Failed to retrieve token.');
-            return; // or throw new Error('Failed to retrieve token.');
-        }
-        const dashboardIds = await getOptimizeDashboardIds(TOKEN);
+        // if (CONNECTION_TYPE === 'cloud') {
+        //
+        //     TOKEN = await getTokenCloud()
+        //
+        // } else if (CONNECTION_TYPE === 'self-managed') {
+        //
+        //     TOKEN = await getTokenSelfManaged()
+        //
+        // } else {
+        //     console.error('Invalid connection_type specified.');
+        //     process.exit(1);
+        // }
+        // if (!TOKEN) {
+        //     console.error('Failed to retrieve token.');
+        //     return; // or throw new Error('Failed to retrieve token.');
+        // }
+        const dashboardIds = await getOptimizeDashboardIds();
         // const reportIds = await getOptimizeReportIds(TOKEN)
-        const dashboardDefinitions = await exportDashboardDefinitions(TOKEN, dashboardIds);
+        const dashboardDefinitions = await exportDashboardDefinitions(dashboardIds);
         // const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds)
         await writeOptimizeEntityToFile(dashboardDefinitions, 'optimize');
         // await writeOptimizeEntityToFile(reportDefinitions, 'optimize')
         const optimizeDataFromFile = await readOptimizeEntityFromFile('optimize');
-        await importOptimizeDefinitions(TOKEN, dashboardDefinitions);
+        await importOptimizeDefinitions(dashboardDefinitions);
         // await importOptimizeDefinitions(TOKEN, reportDefinitions)
         // console.log('Dashboard Definitions: : ', JSON.stringify(optimizeDataFromFile, null, 2));
     }
     catch (error) {
+        console.error('Error:', error);
         // setFailed(error instanceof Error ? error.message : 'An error occurred');
     }
 };

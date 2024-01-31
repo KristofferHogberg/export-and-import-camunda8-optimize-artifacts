@@ -8,18 +8,18 @@ import fsPromises from 'fs/promises';
 dotenv.config();
 
 // TODO: Add connection type if statement in every method.
-let TOKEN = '';
-let CONNECTION_TYPE = 'self-managed';
-// let CONNECTION_TYPE = 'cloud';
+// let TOKEN = '';
+let CONNECTION_TYPE_SOURCE = 'self-managed';
+let CONNECTION_TYPE_DESTINATION = 'cloud';
 
-const BASE_ADDRESS = 'https://akstest.apendo.se/optimize'
-// const BASE_ADDRESS = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce';
+const BASE_ADDRESS_SOURCE = 'https://akstest.apendo.se/optimize'
+const BASE_ADDRESS_DESTINATION = 'https://bru-2.optimize.camunda.io/eac012f7-4678-43b7-bfef-77d78071ddce';
 
-const COLLECTION_ID_SOURCE = '0c51a9c1-33ba-4a2e-a7a1-b2b148f4a539';
-const COLLECTION_ID_DESTINATION = '204018da-092a-47ca-9492-8a4ab1cb548e';
+// const COLLECTION_ID_SOURCE = '0c51a9c1-33ba-4a2e-a7a1-b2b148f4a539';
+const COLLECTION_ID_DESTINATION = '0fac1778-5c82-4425-900a-921df321a499';
 
 // CLOUD
-// const COLLECTION_ID_SOURCE = '73eac2ad-6f12-46f0-aac3-ab12e9ea1184';
+const COLLECTION_ID_SOURCE = '0c51a9c1-33ba-4a2e-a7a1-b2b148f4a539';
 // const COLLECTION_ID_DESTINATION = '0fac1778-5c82-4425-900a-921df321a499';
 
 const getTokenCloud = async () => {
@@ -87,22 +87,21 @@ const getTokenSelfManaged = async () => {
     }
 }
 
-const filterTokenByConnectionType = async () => {
+const getTokenByConnectionTypeSource = async () => {
 
     try {
-        if (CONNECTION_TYPE === 'cloud') {
+        if (CONNECTION_TYPE_SOURCE === 'cloud') {
 
-            TOKEN = await getTokenCloud()
+            return await getTokenCloud()
 
-        } else if (CONNECTION_TYPE === 'self-managed') {
+        } else if (CONNECTION_TYPE_SOURCE === 'self-managed') {
 
-            TOKEN = await getTokenSelfManaged()
+            return await getTokenSelfManaged()
 
         } else {
             console.error('Invalid connection_type specified.');
-            process.exit(1);
+            return false;
         }
-
 
     } catch (error) {
         console.error('Error', error)
@@ -110,8 +109,38 @@ const filterTokenByConnectionType = async () => {
 
 }
 
-const getOptimizeDashboardIds = async (token: string) => {
-    const url = `${BASE_ADDRESS}/api/public/dashboard?collectionId=${COLLECTION_ID_SOURCE}`;
+const getTokenByConnectionTypeDestination = async () => {
+
+    try {
+        if (CONNECTION_TYPE_DESTINATION === 'cloud') {
+
+            return await getTokenCloud()
+
+        } else if (CONNECTION_TYPE_DESTINATION === 'self-managed') {
+
+            return await getTokenSelfManaged()
+
+        } else {
+            console.error('Invalid connection_type specified.');
+            return false;
+        }
+
+    } catch (error) {
+        console.error('Error', error)
+    }
+
+}
+
+const getOptimizeDashboardIds = async () => {
+
+    const url = `${BASE_ADDRESS_SOURCE}/api/public/dashboard?collectionId=${COLLECTION_ID_SOURCE}`;
+    const token = await getTokenByConnectionTypeSource()
+
+    if (!token) {
+        console.error('Failed to retrieve token.');
+        return; // or throw new Error('Failed to retrieve token.');
+    }
+
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -127,8 +156,11 @@ const getOptimizeDashboardIds = async (token: string) => {
 
 }
 
-const getOptimizeReportIds = async (token: string) => {
-    const url = `${BASE_ADDRESS}/api/public/report?collectionId=${COLLECTION_ID_SOURCE}`;
+const getOptimizeReportIds = async () => {
+
+    const url = `${BASE_ADDRESS_SOURCE}/api/public/report?collectionId=${COLLECTION_ID_SOURCE}`;
+    const token = await getTokenByConnectionTypeSource()
+
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -144,8 +176,11 @@ const getOptimizeReportIds = async (token: string) => {
 
 }
 
-const exportDashboardDefinitions = async (token: string, reportIds: string[]) => {
-    const url = `${BASE_ADDRESS}/api/public/export/dashboard/definition/json`
+const exportDashboardDefinitions = async (reportIds: string[]) => {
+
+    const url = `${BASE_ADDRESS_SOURCE}/api/public/export/dashboard/definition/json`
+    const token = await getTokenByConnectionTypeSource()
+
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -160,8 +195,11 @@ const exportDashboardDefinitions = async (token: string, reportIds: string[]) =>
     }
 };
 
-const exportReportDefinitions = async (token: string, reportIds: string[]) => {
-    const url = `${BASE_ADDRESS}/api/public/export/report/definition/json`
+const exportReportDefinitions = async (reportIds: string[]) => {
+
+    const url = `${BASE_ADDRESS_SOURCE}/api/public/export/report/definition/json`
+    const token = await getTokenByConnectionTypeSource()
+
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -176,8 +214,10 @@ const exportReportDefinitions = async (token: string, reportIds: string[]) => {
     }
 };
 
-const importOptimizeDefinitions = async (token: string, optimizeEntityDefinitionsData: any) => {
-    const url = `${BASE_ADDRESS}/api/public/import?collectionId=${COLLECTION_ID_DESTINATION}`;
+const importOptimizeDefinitions = async (optimizeEntityDefinitionsData: any) => {
+
+    const url = `${BASE_ADDRESS_DESTINATION}/api/public/import?collectionId=${COLLECTION_ID_DESTINATION}`;
+    const token = await getTokenByConnectionTypeDestination()
 
     const headers = {
         'Content-Type': 'application/json',
@@ -196,6 +236,7 @@ const importOptimizeDefinitions = async (token: string, optimizeEntityDefinition
 
 const writeOptimizeEntityToFile = async (optimizeEntityData: any, destinationFolderPath: string): Promise<void> => {
     try {
+
         const fileName = 'optimize-entities.json'
         const destinationFilePath = path.join(destinationFolderPath, `${fileName}`);
 
@@ -218,6 +259,7 @@ const writeOptimizeEntityToFile = async (optimizeEntityData: any, destinationFol
 
 const readOptimizeEntityFromFile = async (destinationFolderPath: string) => {
     try {
+
         const fileName = 'optimize-entities.json'
         const destinationFilePath = path.join(destinationFolderPath, `${fileName}`);
 
@@ -241,28 +283,28 @@ const readOptimizeEntityFromFile = async (destinationFolderPath: string) => {
 
 const runWorkflow = async () => {
     try {
-        if (CONNECTION_TYPE === 'cloud') {
+        // if (CONNECTION_TYPE === 'cloud') {
+        //
+        //     TOKEN = await getTokenCloud()
+        //
+        // } else if (CONNECTION_TYPE === 'self-managed') {
+        //
+        //     TOKEN = await getTokenSelfManaged()
+        //
+        // } else {
+        //     console.error('Invalid connection_type specified.');
+        //     process.exit(1);
+        // }
 
-            TOKEN = await getTokenCloud()
+        // if (!TOKEN) {
+        //     console.error('Failed to retrieve token.');
+        //     return; // or throw new Error('Failed to retrieve token.');
+        // }
 
-        } else if (CONNECTION_TYPE === 'self-managed') {
-
-            TOKEN = await getTokenSelfManaged()
-
-        } else {
-            console.error('Invalid connection_type specified.');
-            process.exit(1);
-        }
-
-        if (!TOKEN) {
-            console.error('Failed to retrieve token.');
-            return; // or throw new Error('Failed to retrieve token.');
-        }
-
-        const dashboardIds = await getOptimizeDashboardIds(TOKEN)
+        const dashboardIds = await getOptimizeDashboardIds()
         // const reportIds = await getOptimizeReportIds(TOKEN)
 
-        const dashboardDefinitions = await exportDashboardDefinitions(TOKEN, dashboardIds)
+        const dashboardDefinitions = await exportDashboardDefinitions(dashboardIds)
         // const reportDefinitions = await exportReportDefinitions(TOKEN, reportIds)
 
         await writeOptimizeEntityToFile(dashboardDefinitions, 'optimize')
@@ -270,12 +312,13 @@ const runWorkflow = async () => {
 
         const optimizeDataFromFile = await readOptimizeEntityFromFile('optimize');
 
-        await importOptimizeDefinitions(TOKEN, dashboardDefinitions)
+        await importOptimizeDefinitions(dashboardDefinitions)
         // await importOptimizeDefinitions(TOKEN, reportDefinitions)
 
         // console.log('Dashboard Definitions: : ', JSON.stringify(optimizeDataFromFile, null, 2));
 
     } catch (error) {
+        console.error('Error:', error);
         // setFailed(error instanceof Error ? error.message : 'An error occurred');
     }
 
